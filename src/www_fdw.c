@@ -1107,7 +1107,7 @@ xml_get_result_array_in_doc(xmlDocPtr doc, TupleDesc tuple_desc)
     while(curr) {
         foreach(cell, curr)
         {
-            suspect    = (xmlNodePtr)(cell->data.ptr_value);
+            /*suspect    = (xmlNodePtr)(cell->data.ptr_value);*/ // Do later XML
             switch (suspect->type)
             {
                 case XML_ELEMENT_NODE:
@@ -1202,7 +1202,7 @@ json_get_result_array_in_tree(JSONNode* root, TupleDesc tuple_desc)
     while(curr) {
         foreach(cell, curr)
         {
-            suspect    = (JSONNode*)(cell->data.ptr_value);
+            /*suspect    = (JSONNode*)(cell->data.ptr_value);*/
             switch (suspect->type)
             {
                 case JSON_OBJECT_BEGIN:
@@ -1290,7 +1290,7 @@ call_response_deserialize_callback(ForeignScanState *node, WWW_fdw_options *opts
 
 #ifdef USE_LIBXML
     d("compiled with xml support, passing xml data type to callback");
-    use_libxml = true;
+    /*use_libxml = true;*/ // Add support later
 #else
     d("compiled without xml support, passing text data type to callback");
 #endif

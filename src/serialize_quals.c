@@ -733,10 +733,10 @@ serialize_node_var(int indent, Node *node, SerializeNodeWithChildrenCallback nwc
 	params = lappend(params, oid_to_string(v->varcollid));
 	params = lappend(params, "varlevelsup");
 	params = lappend(params, index_to_string(v->varlevelsup));
-	params = lappend(params, "varnoold");
-	params = lappend(params, index_to_string(v->varnoold));
-	params = lappend(params, "varoattno");
-	params = lappend(params, attrnumber_to_string(v->varoattno));
+	/*params = lappend(params, "varnoold");*/
+	/*params = lappend(params, index_to_string(v->varnoold));*/
+	/*params = lappend(params, "varoattno");*/
+	/*params = lappend(params, attrnumber_to_string(v->varoattno));*/
 	params = lappend(params, "location");
 	params = lappend(params, int_to_string(v->location));
 

@@ -628,6 +628,7 @@ www_get_foreign_paths(PlannerInfo *root,
     /* calculations from file_fdw
      * we can't calculate value for baserel->rows here
      * */
+    float cpu_tuple_cost = 0.01; // Fix for 12
     Cost        cpu_per_tuple   = cpu_tuple_cost * 10 + baserel->baserestrictcost.per_tuple;
     Cost        startup_cost    = baserel->baserestrictcost.startup;
     Cost        total_cost      = startup_cost + cpu_per_tuple * baserel->rows;
@@ -2089,7 +2090,7 @@ www_iterate(ForeignScanState *node)
     else
         tuple = heap_copytuple(reply->tuples[reply->tuple_index++]);
     MemoryContextSwitchTo(oldcontext);
-    ExecStoreTuple(tuple, slot, InvalidBuffer, true);
+    ExecStoreHeapTuple(tuple, slot, true);
 
     return slot;
 }

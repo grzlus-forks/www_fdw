@@ -474,7 +474,7 @@ www_param(Node *node, TupleDesc tupdesc)
                 StringInfoData    buf;
                 Index   varattno = ((Var *) arg)->varattno;
                 Assert(0 < varattno && varattno <= tupdesc->natts);
-                key = NameStr(tupdesc->attrs[varattno - 1]->attname);
+                key = NameStr(tupdesc->attrs[varattno - 1].attname);
 
                 initStringInfo(&buf);
                 appendStringInfo(&buf, "%s=%s", percent_encode((unsigned char *) key, -1),
@@ -508,7 +508,7 @@ www_param(Node *node, TupleDesc tupdesc)
         StringInfoData    buf;
         Index   varattno = ((Var *) node)->varattno;
         Assert(0 < varattno && varattno <= tupdesc->natts);
-        key = NameStr(tupdesc->attrs[varattno - 1]->attname);
+        key = NameStr(tupdesc->attrs[varattno - 1].attname);
 
         initStringInfo(&buf);
         appendStringInfo(&buf, "%s=%s", percent_encode((unsigned char *) key, -1),
@@ -580,7 +580,7 @@ www_param(Node *node, TupleDesc tupdesc)
 
         varattno = ((Var *) left)->varattno;
         Assert(0 < varattno && varattno <= tupdesc->natts);
-        key = NameStr(tupdesc->attrs[varattno - 1]->attname);
+        key = NameStr(tupdesc->attrs[varattno - 1].attname);
 
         initStringInfo(&buf);
         val = serialize_const((Const *) right);
@@ -862,7 +862,7 @@ serialize_request_with_callback(WWW_fdw_options *opts, Oid opts_type, Datum opts
         ereport(ERROR,
             (
                 errcode(ERRCODE_SYNTAX_ERROR),
-                errmsg("No results were returned from request_serialize_callback '%s': %i", opts->request_serialize_callback, SPI_processed)
+                errmsg("No results were returned from request_serialize_callback '%s': %lu", opts->request_serialize_callback, SPI_processed)
             )
         );
     }
@@ -872,7 +872,7 @@ serialize_request_with_callback(WWW_fdw_options *opts, Oid opts_type, Datum opts
         ereport(ERROR,
             (
                 errcode(ERRCODE_SYNTAX_ERROR),
-                errmsg("More than 1 result was returned from request_serialize_callback '%s': %i", opts->request_serialize_callback, SPI_processed)
+                errmsg("More than 1 result was returned from request_serialize_callback '%s': %lu", opts->request_serialize_callback, SPI_processed)
             )
         );
     }
@@ -1101,7 +1101,7 @@ xml_get_result_array_in_doc(xmlDocPtr doc, TupleDesc tuple_desc)
     /* prepare attnames in xmlChar*, to save time for strings comparisons in xml_check_result_array */
     attnames    = (xmlChar**)palloc(tuple_desc->natts * sizeof(xmlChar*));
     for( i=0; i<tuple_desc->natts; i++ )
-        attnames[i]    = xmlCharStrndup(tuple_desc->attrs[i]->attname.data, strlen(tuple_desc->attrs[i]->attname.data));
+        attnames[i]    = xmlCharStrndup(tuple_desc->attrs[i].attname.data, strlen(tuple_desc->attrs[i].attname.data));
 
     while(curr) {
         foreach(cell, curr)
@@ -1166,7 +1166,7 @@ json_check_result_array(JSONNode* root, TupleDesc tuple_desc)
         {
             for( k=0; k<tuple_desc->natts && 0==n; k++ )
             {
-                if(0 == namestrcmp(&tuple_desc->attrs[k]->attname, root->val.val_array[i].val.val_object[j].key))
+                if(0 == namestrcmp(&tuple_desc->attrs[k].attname, root->val.val_array[i].val.val_object[j].key))
                 {
                     /* don't check found value to be of ordinary type here - we can serialize it in the answer */
 
@@ -1346,7 +1346,7 @@ call_response_deserialize_callback(ForeignScanState *node, WWW_fdw_options *opts
 
         for( j=0; j<SPI_tuptable->tupdesc->natts; j++ )
         {
-            if(0 == namestrcmp(&rel->rd_att->attrs[i]->attname, names[j]))
+            if(0 == namestrcmp(&rel->rd_att->attrs[i].attname, names[j]))
             {
                 columns[i]    = j+1;
                 break;
@@ -1471,7 +1471,7 @@ get_www_fdw_options(WWW_fdw_options *opts, Oid *opts_type, Datum *opts_value)
         ereport(ERROR,
                 (
                     errcode(ERRCODE_SYNTAX_ERROR),
-                    errmsg("Can't identify WWW_fdw_options OID: not exactly 1 result was returned (%d)", SPI_processed)
+                    errmsg("Can't identify WWW_fdw_options OID: not exactly 1 result was returned (%lu)", SPI_processed)
                     )
             );
     }
@@ -1538,7 +1538,7 @@ get_www_fdw_post_parameters(PostParameters *post, Oid *post_type, Datum *post_va
         ereport(ERROR,
                 (
                     errcode(ERRCODE_SYNTAX_ERROR),
-                    errmsg("Can't identify WWWFdwPostParameters OID: not exactly 1 result was returned (%d)", SPI_processed)
+                    errmsg("Can't identify WWWFdwPostParameters OID: not exactly 1 result was returned (%lu)", SPI_processed)
                     )
             );
     }
@@ -1638,7 +1638,7 @@ prepare_xml_result(ForeignScanState *node, WWW_fdw_options *opts, Oid opts_type,
     natts = rel->rd_att->natts;
     attnames    = (xmlChar**)palloc(natts * sizeof(xmlChar*));
     for (i = 0; i < natts; i++)
-        attnames[i]    = xmlCharStrndup(rel->rd_att->attrs[i]->attname.data, strlen(rel->rd_att->attrs[i]->attname.data));
+        attnames[i]    = xmlCharStrndup(rel->rd_att->attrs[i].attname.data, strlen(rel->rd_att->attrs[i].attname.data));
 
     /* find column places */
     values = (char **) palloc(sizeof(char *) * natts);
@@ -1712,7 +1712,7 @@ prepare_json_result(ForeignScanState *node, WWW_fdw_options *opts, Oid opts_type
         for( j=0; j<natts; j++ )
         {
             for( k=0; k<json_obj.length; k++ )
-                if(0 == namestrcmp(&rel->rd_att->attrs[j]->attname, json_obj.val.val_object[k].key))
+                if(0 == namestrcmp(&rel->rd_att->attrs[j].attname, json_obj.val.val_object[k].key))
                     break;
 
             if(k < json_obj.length)
@@ -2039,7 +2039,7 @@ call_response_iterate_callback(ForeignScanState *node, WWW_fdw_options *opts, Oi
         ereport(ERROR,
             (
                 errcode(ERRCODE_SYNTAX_ERROR),
-                errmsg("More than 1 result was returned from response_iterate_callback '%s': %i", opts->response_iterate_callback, SPI_processed)
+                errmsg("More than 1 result was returned from response_iterate_callback '%s': %lu", opts->response_iterate_callback, SPI_processed)
             )
         );
     }
